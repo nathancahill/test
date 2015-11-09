@@ -81,18 +81,6 @@
 	 */
 	var submit = function submit() {
 	    if (!github.getToken()) return;
-
-	    getRepos(function (response) {
-	        if (repo in response) {
-	            branch();
-	        } else {
-	            forkRepo('trailbehind/OpenHuntingData', function () {
-	                // setTimeout(() => {
-	                //  ping for repo
-	                // }, 500)
-	            });
-	        }
-	    });
 	};
 
 	if (github.getToken()) {
@@ -106,34 +94,6 @@
 	    }
 	}
 
-	// - Branch (https://gist.github.com/potherca/3964930):
-
-	// POST /repos/:owner/OpenHuntingData/git/refs
-
-	// {
-	//   "ref": "refs/heads/:new-branch-name>",
-	//   "sha": ":recent-hash"
-	// }
-
-	// - Create File (https://developer.github.com/v3/repos/contents/#create-a-file):
-
-	// PUT /repos/:owner/OpenHuntingData/contents/sources/US/:state/.json
-
-	// {
-	//     "message": "add source for ..",
-	//     "content": "base64 encode"
-	// }
-
-	// - Pull request (https://developer.github.com/v3/pulls/#create-a-pull-request):
-
-	// POST /repos/trailbehind/OpenHuntingData/pulls
-
-	// {
-	//     "title": "add source for ..",
-	//     "head": ":owner::new-branch-name",
-	//     "base": "master"
-	// }
-
 /***/ },
 /* 1 */
 /***/ function(module, exports, __webpack_require__) {
@@ -143,7 +103,7 @@
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
-	exports.branchRepo = exports.forkRepo = exports.getRepos = exports.getUser = exports.ajax = exports.accessToken = exports.getToken = undefined;
+	exports.pullRequest = exports.createFile = exports.branchRepo = exports.forkRepo = exports.getRepos = exports.getUser = exports.ajax = exports.accessToken = exports.getToken = undefined;
 
 	var _nanoajax = __webpack_require__(2);
 
@@ -230,15 +190,61 @@
 	 * Create branch in repo.
 	 * 
 	 * @param  {string}   repo   repo to create the branch in.
-	 * @param  {string}   branch branch name
+	 * @param  {string}   branch branch name.
+	 * @param  {string}   sha    SHA1 to set the branch to.
 	 * @param  {function} cb     callback
 	 */
-	var branchRepo = exports.branchRepo = function branchRepo(repo, branch, cb) {
+	var branchRepo = exports.branchRepo = function branchRepo(repo, branch, sha, cb) {
 	    ajax({
-	        url: '/repos/:owner/OpenHuntingData/git/refs',
+	        url: API_BASE + '/repos/' + repo + '/git/refs',
 	        body: JSON.stringify({
 	            ref: 'refs/heads/' + branch,
-	            sha: ':recent-hash'
+	            sha: sha
+	        })
+	    }, function (response) {
+	        return cb(response);
+	    });
+	};
+
+	/**
+	 * Create file in repo.
+	 * 
+	 * @param  {string}   repo    repo to create the file in.
+	 * @param  {string}   branch  branch to create the file in.
+	 * @param  {string}   path    file path.
+	 * @param  {base64}   content base64 encoded file content.
+	 * @param  {string}   message commit message.
+	 * @param  {function} cb      callback
+	 */
+	var createFile = exports.createFile = function createFile(repo, branch, path, content, message, cb) {
+	    ajax({
+	        url: API_BASE + '/' + repo + '/contents/' + path,
+	        method: 'PUT',
+	        body: JSON.stringify({
+	            message: message,
+	            content: content,
+	            branch: branch
+	        }, function (response) {
+	            return cb(response);
+	        })
+	    });
+	};
+
+	/**
+	 * Create a pull request
+	 * 
+	 * @param  {string}   repo    repo to create the pull request in.
+	 * @param  {string}   head    branch to pull request, ie. user:add-source
+	 * @param  {string}   message pull request title.
+	 * @param  {function} cb      callback
+	 */
+	var pullRequest = exports.pullRequest = function pullRequest(repo, head, message, cb) {
+	    ajax({
+	        url: API_BASE + '/' + repo + '/pulls',
+	        body: JSON.stringify({
+	            title: message,
+	            head: head,
+	            base: 'master'
 	        })
 	    }, function (response) {
 	        return cb(response);
@@ -378,7 +384,7 @@
 	    var _iteratorError = undefined;
 
 	    try {
-	        for (var _iterator = location.search.substring(1).split('&')[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	        for (var _iterator = window.location.search.substring(1).split('&')[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
 	            var param = _step.value;
 
 	            var nv = param.split('=');
