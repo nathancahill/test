@@ -110,19 +110,23 @@
 	        filetype: form.filetype.value
 	    };
 
-	    github.getRepos(function (response) {
-	        console.log(response);
+	    github.getUser(function (response) {
+	        var username = response.login;
 
-	        // if (repo in response) {
-	        //     // addSource(repo, source)
-	        // } else {
-	        //     // forkRepo('trailbehind/OpenHuntingData', () => {
-	        //     //     // setTimeout(() => {
-	        //     //     //     ping for repo
-	        //     //     //     addSource(repo, source)
-	        //     //     // }, 500)
-	        //     // })
-	        // }
+	        github.getRepo(username + '/' + 'OpenHuntingData', function (response) {
+	            if (resposne) {
+	                console.log(response);
+	            } else {
+	                console.log('repo not found');
+
+	                // forkRepo('trailbehind/OpenHuntingData', () => {
+	                //     // setTimeout(() => {
+	                //     //     ping for repo
+	                //     //     addSource(repo, source)
+	                //     // }, 500)
+	                // })
+	            }
+	        });
 	    });
 	};
 
@@ -148,7 +152,7 @@
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
-	exports.pullRequest = exports.createFile = exports.branchRepo = exports.forkRepo = exports.getRepos = exports.getUser = exports.ajax = exports.accessToken = exports.getToken = undefined;
+	exports.pullRequest = exports.createFile = exports.branchRepo = exports.forkRepo = exports.getRepo = exports.getUser = exports.ajax = exports.accessToken = exports.getToken = undefined;
 
 	var _nanoajax = __webpack_require__(2);
 
@@ -197,22 +201,25 @@
 	/**
 	 * Get user.
 	 * 
-	 * @param  {function} cb function
+	 * @param  {function} cb callback
 	 */
 	var getUser = exports.getUser = function getUser(cb) {
-	    ajax({ url: API_BASE + '/user' }, function (response) {
-	        return cb(response);
-	    });
+	    ajax({ url: API_BASE + '/user' }, cb);
 	};
 
 	/**
-	 * Get user repos.
-	 * 
-	 * @param  {function} cb callback
+	 * Get repo if exists.
+	 *
+	 * @param  {string}   repo repo to check.
+	 * @param  {function} cb   callback
 	 */
-	var getRepos = exports.getRepos = function getRepos(cb) {
-	    ajax({ url: API_BASE + '/user/repos' }, function (response) {
-	        return cb(response);
+	var getRepo = exports.getRepo = function getRepo(repo, cb) {
+	    ajax({ url: API_BASE + '/repos/' + repo }, function (response) {
+	        if (response.message && response.message === 'Not Found') {
+	            cb(null);
+	        } else {
+	            cb(response);
+	        }
 	    });
 	};
 
@@ -226,9 +233,7 @@
 	    ajax({
 	        url: API_BASE + '/repos/' + repo + '/forks',
 	        method: 'POST'
-	    }, function (response) {
-	        return cb(response);
-	    });
+	    }, cb);
 	};
 
 	/**
@@ -246,9 +251,7 @@
 	            ref: 'refs/heads/' + branch,
 	            sha: sha
 	        })
-	    }, function (response) {
-	        return cb(response);
-	    });
+	    }, cb);
 	};
 
 	/**
@@ -269,9 +272,7 @@
 	            message: message,
 	            content: content,
 	            branch: branch
-	        }, function (response) {
-	            return cb(response);
-	        })
+	        }, cb)
 	    });
 	};
 
@@ -291,9 +292,7 @@
 	            head: head,
 	            base: 'master'
 	        })
-	    }, function (response) {
-	        return cb(response);
-	    });
+	    }, cb);
 	};
 
 /***/ },
