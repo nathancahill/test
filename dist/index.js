@@ -68,12 +68,33 @@
 	var getParams = function getParams() {
 	    var params = {};
 
-	    for (param in location.search.substring(1).split('&')) {
-	        var nv = param.split('=');
+	    var _iteratorNormalCompletion = true;
+	    var _didIteratorError = false;
+	    var _iteratorError = undefined;
 
-	        if (!nv[0]) continue;
+	    try {
+	        for (var _iterator = location.search.substring(1).split('&')[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	            var param = _step.value;
 
-	        params[nv[0]] = nv[1] || true;
+	            var nv = param.split('=');
+
+	            if (!nv[0]) continue;
+
+	            params[nv[0]] = nv[1] || true;
+	        }
+	    } catch (err) {
+	        _didIteratorError = true;
+	        _iteratorError = err;
+	    } finally {
+	        try {
+	            if (!_iteratorNormalCompletion && _iterator.return) {
+	                _iterator.return();
+	            }
+	        } finally {
+	            if (_didIteratorError) {
+	                throw _iteratorError;
+	            }
+	        }
 	    }
 
 	    return params;
@@ -110,6 +131,7 @@
 	};
 
 	params = getParams();
+	console.log(params)
 	token = window.localStorage.getItem('token');
 
 	if (params.code) {
