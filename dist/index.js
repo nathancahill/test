@@ -301,7 +301,7 @@
 	 */
 	var pullRequest = exports.pullRequest = function pullRequest(repo, head, message, cb) {
 	    ajax({
-	        url: API_BASE + '/' + repo + '/pulls',
+	        url: API_BASE + '/repos/' + repo + '/pulls',
 	        body: JSON.stringify({
 	            title: message,
 	            head: head,
