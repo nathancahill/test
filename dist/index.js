@@ -56,7 +56,8 @@
 
 	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
-	var params = utils.getParams();
+	var params = utils.getParams(),
+	    form = window.document.forms['submission'];
 
 	/**
 	 * Sign in user, when loading the page or after authentication.
@@ -65,8 +66,7 @@
 	 */
 	var signinUser = function signinUser(user) {
 	    var button = window.document.getElementById('signin'),
-	        blank = window.document.getElementById('unauthenticated'),
-	        form = window.document.forms['submission'];
+	        blank = window.document.getElementById('unauthenticated');
 
 	    button.setAttribute('href', '#');
 	    button.innerHTML = '<img class="avatar" src="' + (user.avatar_url + '&s=40') + '" /> ' + user.login;
@@ -75,12 +75,55 @@
 	    form.style.display = 'block';
 	};
 
+	var addSource = function addSource(repo, source) {
+	    var filename = source.species.join('-').replace(/[\s]/g, '').toLowerCase(),
+	        path = 'sources/' + source.country + '/' + source.state + '/' + filename + '.json',
+	        branch = 'add-' + source.country + '-' + source.state + '-' + filename,
+	        message = 'add ' + source.country + '/' + source.state + '/' + filename + '.json',
+	        content = window.btoa(JSON.stringify(source, null, 3));
+
+	    github.branch(repo, branch, sha, function () {
+	        github.createFile(repo, branch, path, content, message, function () {
+	            github.pullRequest('trailbehind/OpenHuntingData', 'user:' + branch, message, function () {
+	                console.log('done');
+	            });
+	        });
+	    });
+	};
+
 	/**
-	 * Submit 
-	 * @return {[type]} [description]
+	 * Submit source form to Github pull request.
 	 */
-	var submit = function submit() {
+	var submit = function submit(e) {
+	    var source = undefined;
+
+	    e.preventDefault();
+
 	    if (!github.getToken()) return;
+
+	    source = {
+	        url: form.url.value,
+	        species: form.species.value.split(', '),
+	        attribution: form.attribution.value,
+	        country: form.country.value,
+	        state: form.state.value,
+	        filetype: form.filetype.value
+	    };
+
+	    github.getRepos(function (response) {
+	        console.log(response);
+
+	        // if (repo in response) {
+	        //     // addSource(repo, source)
+	        // } else {
+	        //     // forkRepo('trailbehind/OpenHuntingData', () => {
+	        //     //     // setTimeout(() => {
+	        //     //     //     ping for repo
+	        //     //     //     addSource(repo, source)
+	        //     //     // }, 500)
+	        //     // })
+	        // }
+	    });
 	};
 
 	if (github.getToken()) {
@@ -93,6 +136,8 @@
 	        });
 	    }
 	}
+
+	form.addEventListener('submit', submit, false);
 
 /***/ },
 /* 1 */
