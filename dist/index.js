@@ -56,9 +56,13 @@
 
 	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
 
-	var token = github.getToken(),
-	    params = utils.getParams();
+	var params = utils.getParams();
 
+	/**
+	 * Login user, when loading the page or after authentication.
+	 * 
+	 * @param  {object} user Github user object.
+	 */
 	var loginUser = function loginUser(user) {
 	    var dom = window.document.getElementById('login');
 
@@ -66,8 +70,12 @@
 	    dom.textContent = user.login;
 	};
 
+	/**
+	 * Submit 
+	 * @return {[type]} [description]
+	 */
 	var submit = function submit() {
-	    if (!token) return;
+	    if (!github.getToken()) return;
 
 	    getRepos(function (response) {
 	        if (repo in response) {
@@ -83,7 +91,9 @@
 	};
 
 	if (params.code) {
-	    github.accessToken(params.code, github.getUser(loginUser));
+	    github.accessToken(params.code, function () {
+	        github.getUser(loginUser);
+	    });
 	}
 
 	// - Branch (https://gist.github.com/potherca/3964930):
@@ -114,7 +124,7 @@
 	//     "base": "master"
 	// }
 
-	if (token) {
+	if (github.getToken()) {
 	    github.getUser(loginUser);
 	}
 
