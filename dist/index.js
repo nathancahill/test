@@ -64,10 +64,13 @@
 	 * @param  {object} user Github user object.
 	 */
 	var loginUser = function loginUser(user) {
-	    var dom = window.document.getElementById('login');
+	    var button = window.document.getElementById('login'),
+	        avatar = window.document.getElementById('avatar'),
+	        username = window.document.getElementById('username');
 
-	    dom.setAttribute('href', '#');
-	    dom.textContent = user.login;
+	    button.setAttribute('href', '#');
+	    avatar.setAttribute('src', user.avatar_url + '&s=40');
+	    username.textContent = user.login;
 	};
 
 	/**
