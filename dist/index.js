@@ -95,10 +95,14 @@
 	    });
 	};
 
-	if (params.code) {
-	    github.accessToken(params.code, function () {
-	        github.getUser(signinUser);
-	    });
+	if (github.getToken()) {
+	    github.getUser(signinUser);
+	} else {
+	    if (params.code) {
+	        github.accessToken(params.code, function () {
+	            github.getUser(signinUser);
+	        });
+	    }
 	}
 
 	// - Branch (https://gist.github.com/potherca/3964930):
@@ -128,10 +132,6 @@
 	//     "head": ":owner::new-branch-name",
 	//     "base": "master"
 	// }
-
-	if (github.getToken()) {
-	    github.getUser(signinUser);
-	}
 
 /***/ },
 /* 1 */
