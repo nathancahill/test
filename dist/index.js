@@ -75,17 +75,19 @@
 	    form.style.display = 'block';
 	};
 
-	var addSource = function addSource(repo, source) {
+	var addSource = function addSource(username, repo, source) {
 	    var filename = source.species.join('-').replace(/[\s]/g, '').toLowerCase(),
 	        path = 'sources/' + source.country + '/' + source.state + '/' + filename + '.json',
 	        branch = 'add-' + source.country + '-' + source.state + '-' + filename,
 	        message = 'add ' + source.country + '/' + source.state + '/' + filename + '.json',
 	        content = window.btoa(JSON.stringify(source, null, 3));
 
-	    github.branch(repo, branch, sha, function () {
-	        github.createFile(repo, branch, path, content, message, function () {
-	            github.pullRequest('trailbehind/OpenHuntingData', 'user:' + branch, message, function () {
-	                console.log('done');
+	    github.getHead(repo, function (sha) {
+	        github.branch(repo, branch, sha, function () {
+	            github.createFile(repo, branch, path, content, message, function () {
+	                github.pullRequest('trailbehind/OpenHuntingData', username + ':' + branch, message, function () {
+	                    console.log('done');
+	                });
 	            });
 	        });
 	    });
@@ -111,11 +113,12 @@
 	    };
 
 	    github.getUser(function (response) {
-	        var username = response.login;
+	        var username = response.login,
+	            repo = username + '/' + 'OpenHuntingData';
 
-	        github.getRepo(username + '/' + 'OpenHuntingData', function (response) {
+	        github.getRepo(repo, function (response) {
 	            if (response) {
-	                console.log(response);
+	                addSource(username, repo, source);
 	            } else {
 	                console.log('repo not found');
 
@@ -152,7 +155,7 @@
 	Object.defineProperty(exports, "__esModule", {
 	    value: true
 	});
-	exports.pullRequest = exports.createFile = exports.branchRepo = exports.forkRepo = exports.getRepo = exports.getUser = exports.ajax = exports.accessToken = exports.getToken = undefined;
+	exports.pullRequest = exports.createFile = exports.branchRepo = exports.forkRepo = exports.getHead = exports.getRepo = exports.getUser = exports.ajax = exports.accessToken = exports.getToken = undefined;
 
 	var _nanoajax = __webpack_require__(2);
 
@@ -220,6 +223,18 @@
 	        } else {
 	            cb(response);
 	        }
+	    });
+	};
+
+	/**
+	 * Get latest commit SHA on master branch.
+	 * 
+	 * @param  {string}   repo repo to get commit from.
+	 * @param  {function} cb   callback
+	 */
+	var getHead = exports.getHead = function getHead(repo, cb) {
+	    ajax({ url: API_BASE + '/repos/' + repo + '/git/refs/heads/master' }, function (response) {
+	        cb(response.object.sha);
 	    });
 	};
 
