@@ -114,7 +114,7 @@
 	        var username = response.login;
 
 	        github.getRepo(username + '/' + 'OpenHuntingData', function (response) {
-	            if (resposne) {
+	            if (response) {
 	                console.log(response);
 	            } else {
 	                console.log('repo not found');
