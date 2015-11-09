@@ -59,12 +59,12 @@
 	var params = utils.getParams();
 
 	/**
-	 * Login user, when loading the page or after authentication.
+	 * Sign in user, when loading the page or after authentication.
 	 * 
 	 * @param  {object} user Github user object.
 	 */
-	var loginUser = function loginUser(user) {
-	    var button = window.document.getElementById('login');
+	var signinUser = function signinUser(user) {
+	    var button = window.document.getElementById('signin');
 
 	    button.setAttribute('href', '#');
 	    button.innerHTML = '<img class="avatar" src="' + (user.avatar_url + '&s=40') + '" /> ' + user.login;
@@ -92,7 +92,7 @@
 
 	if (params.code) {
 	    github.accessToken(params.code, function () {
-	        github.getUser(loginUser);
+	        github.getUser(signinUser);
 	    });
 	}
 
@@ -125,7 +125,7 @@
 	// }
 
 	if (github.getToken()) {
-	    github.getUser(loginUser);
+	    github.getUser(signinUser);
 	}
 
 /***/ },
