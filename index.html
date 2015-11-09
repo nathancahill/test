@@ -28,7 +28,7 @@
 <body>
     <div class="container">
         <div class="columns">
-            <div class="two-thirds column centered">
+            <div class="two-thirds column centered" id="authenticated">
 
                 <br><br>
 
@@ -36,7 +36,16 @@
 
                 <h2>Open Hunting Data Submission</h2>
 
-                <form name="submission">
+                <div class="blankslate" id="unauthenticated">
+                  <h3>Help grow Open Hunting Data</h3>
+                  <p>
+                    Sign in with GitHub to get started or <a href="http://github.com/trailbehind/OpenHuntingData">learn more</a>.
+                    <br><br>
+                    <a class="btn" href="https://github.com/login/oauth/authorize?client_id=80f0810fe99cf4c0a7fd&redirect_uri=http://nathancahill.github.io/test/&scope=public_repo" role="button">Sign In with GitHub</a>
+                </p>
+                </div>
+
+                <form name="submission" style="display: none">
                     <dl class="form">
                         <dt>
                             <label for="url">Public Data URL</label>

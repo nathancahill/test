@@ -64,10 +64,15 @@
 	 * @param  {object} user Github user object.
 	 */
 	var signinUser = function signinUser(user) {
-	    var button = window.document.getElementById('signin');
+	    var button = window.document.getElementById('signin'),
+	        blank = window.document.getElementById('unauthenticated'),
+	        form = window.document.forms['submission'];
 
 	    button.setAttribute('href', '#');
 	    button.innerHTML = '<img class="avatar" src="' + (user.avatar_url + '&s=40') + '" /> ' + user.login;
+
+	    blank.style.display = 'none';
+	    form.style.display = 'block';
 	};
 
 	/**
