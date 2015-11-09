@@ -46,7 +46,90 @@
 
 	'use strict';
 
-	var _nanoajax = __webpack_require__(1);
+	var _github = __webpack_require__(1);
+
+	var github = _interopRequireWildcard(_github);
+
+	var _utils = __webpack_require__(3);
+
+	var utils = _interopRequireWildcard(_utils);
+
+	function _interopRequireWildcard(obj) { if (obj && obj.__esModule) { return obj; } else { var newObj = {}; if (obj != null) { for (var key in obj) { if (Object.prototype.hasOwnProperty.call(obj, key)) newObj[key] = obj[key]; } } newObj.default = obj; return newObj; } }
+
+	var token = github.getToken(),
+	    params = utils.getParams();
+
+	var loginUser = function loginUser(user) {
+	    var dom = window.document.getElementById('login');
+
+	    dom.setAttribute('href', '#');
+	    dom.textContent = user.login;
+	};
+
+	var submit = function submit() {
+	    if (!token) return;
+
+	    getRepos(function (response) {
+	        if (repo in response) {
+	            branch();
+	        } else {
+	            forkRepo('trailbehind/OpenHuntingData', function () {
+	                // setTimeout(() => {
+	                //  ping for repo
+	                // }, 500)
+	            });
+	        }
+	    });
+	};
+
+	if (params.code) {
+	    github.accessToken(params.code, github.getUser(loginUser));
+	}
+
+	// - Branch (https://gist.github.com/potherca/3964930):
+
+	// POST /repos/:owner/OpenHuntingData/git/refs
+
+	// {
+	//   "ref": "refs/heads/:new-branch-name>",
+	//   "sha": ":recent-hash"
+	// }
+
+	// - Create File (https://developer.github.com/v3/repos/contents/#create-a-file):
+
+	// PUT /repos/:owner/OpenHuntingData/contents/sources/US/:state/.json
+
+	// {
+	//     "message": "add source for ..",
+	//     "content": "base64 encode"
+	// }
+
+	// - Pull request (https://developer.github.com/v3/pulls/#create-a-pull-request):
+
+	// POST /repos/trailbehind/OpenHuntingData/pulls
+
+	// {
+	//     "title": "add source for ..",
+	//     "head": ":owner::new-branch-name",
+	//     "base": "master"
+	// }
+
+	if (token) {
+	    github.getUser(loginUser);
+	}
+
+/***/ },
+/* 1 */
+/***/ function(module, exports, __webpack_require__) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+	exports.branchRepo = exports.forkRepo = exports.getRepos = exports.getUser = exports.ajax = exports.accessToken = exports.getToken = undefined;
+
+	var _nanoajax = __webpack_require__(2);
 
 	var _nanoajax2 = _interopRequireDefault(_nanoajax);
 
@@ -56,48 +139,12 @@
 	var REDIRECT_URI = 'http://nathancahill.github.io/test/';
 	var SCOPE = 'public_repo';
 	var OAUTH_URL = 'https://github.com/login/oauth/authorize?client_id=' + CLIENT_ID + '&redirect_uri=' + REDIRECT_URI + '&scope=' + SCOPE;
+	var API_BASE = 'https://api.github.com';
 
-	var token = undefined,
-	    params = undefined;
+	var token = window.localStorage.getItem('token');
 
-	/**
-	 * Get params from URL
-	 * 
-	 * Modified from http://stackoverflow.com/a/979996/1377021
-	 */
-	var getParams = function getParams() {
-	    var params = {};
-
-	    var _iteratorNormalCompletion = true;
-	    var _didIteratorError = false;
-	    var _iteratorError = undefined;
-
-	    try {
-	        for (var _iterator = location.search.substring(1).split('&')[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
-	            var param = _step.value;
-
-	            var nv = param.split('=');
-
-	            if (!nv[0]) continue;
-
-	            params[nv[0]] = nv[1] || true;
-	        }
-	    } catch (err) {
-	        _didIteratorError = true;
-	        _iteratorError = err;
-	    } finally {
-	        try {
-	            if (!_iteratorNormalCompletion && _iterator.return) {
-	                _iterator.return();
-	            }
-	        } finally {
-	            if (_didIteratorError) {
-	                throw _iteratorError;
-	            }
-	        }
-	    }
-
-	    return params;
+	var getToken = exports.getToken = function getToken() {
+	    return token;
 	};
 
 	/**
@@ -105,7 +152,7 @@
 	 * 
 	 * @param  {string} code OAuth code from Github API
 	 */
-	var accessToken = function accessToken(code, cb) {
+	var accessToken = exports.accessToken = function accessToken(code, cb) {
 	    _nanoajax2.default.ajax({
 	        url: 'https://quiet-waters-2356.herokuapp.com/authenticate/' + code
 	    }, function (code, response) {
@@ -116,34 +163,78 @@
 	    });
 	};
 
-	var ajax = function ajax(options, callback) {
+	/**
+	 * AJAX call with Github Authorization header.
+	 * 
+	 * @param  {object}   options nanoajax options
+	 * @param  {function} cb      callback
+	 */
+	var ajax = exports.ajax = function ajax(options, cb) {
 	    options.headers = { 'Authorization': 'token ' + token };
 
-	    _nanoajax2.default.ajax(options, callback);
-	};
-
-	var getRepos = function getRepos() {
-	    ajax({
-	        url: 'https://api.github.com/user/repos'
-	    }, function (code, response) {
-	        console.log(response);
+	    _nanoajax2.default.ajax(options, function (code, response) {
+	        return cb(JSON.parse(response));
 	    });
 	};
 
-	params = getParams();
-	console.log(params)
-	token = window.localStorage.getItem('token');
+	/**
+	 * Get user.
+	 * 
+	 * @param  {function} cb function
+	 */
+	var getUser = exports.getUser = function getUser(cb) {
+	    ajax({ url: API_BASE + '/user' }, function (response) {
+	        return cb(response);
+	    });
+	};
 
-	if (params.code) {
-	    accessToken(params.code, getRepos);
-	}
+	/**
+	 * Get user repos.
+	 * 
+	 * @param  {function} cb callback
+	 */
+	var getRepos = exports.getRepos = function getRepos(cb) {
+	    ajax({ url: API_BASE + '/user/repos' }, function (response) {
+	        return cb(response);
+	    });
+	};
 
-	if (token) {
-	    getRepos();
-	}
+	/**
+	 * Fork repo.
+	 *
+	 * @param  {string}   repo repo to fork, ie. 'trailbehind/OpenHuntingData'
+	 * @param  {function} cb   callback
+	 */
+	var forkRepo = exports.forkRepo = function forkRepo(repo, cb) {
+	    ajax({
+	        url: API_BASE + '/repos/' + repo + '/forks',
+	        method: 'POST'
+	    }, function (response) {
+	        return cb(response);
+	    });
+	};
+
+	/**
+	 * Create branch in repo.
+	 * 
+	 * @param  {string}   repo   repo to create the branch in.
+	 * @param  {string}   branch branch name
+	 * @param  {function} cb     callback
+	 */
+	var branchRepo = exports.branchRepo = function branchRepo(repo, branch, cb) {
+	    ajax({
+	        url: '/repos/:owner/OpenHuntingData/git/refs',
+	        body: JSON.stringify({
+	            ref: 'refs/heads/' + branch,
+	            sha: ':recent-hash'
+	        })
+	    }, function (response) {
+	        return cb(response);
+	    });
+	};
 
 /***/ },
-/* 1 */
+/* 2 */
 /***/ function(module, exports) {
 
 	/* WEBPACK VAR INJECTION */(function(global) {// Best place to find information on XHR features is:
@@ -251,6 +342,56 @@
 	}
 
 	/* WEBPACK VAR INJECTION */}.call(exports, (function() { return this; }())))
+
+/***/ },
+/* 3 */
+/***/ function(module, exports) {
+
+	'use strict';
+
+	Object.defineProperty(exports, "__esModule", {
+	    value: true
+	});
+
+	/**
+	 * Get params from URL.
+	 * 
+	 * Modified from http://stackoverflow.com/a/979996/1377021
+	 */
+	var getParams = exports.getParams = function getParams() {
+	    var params = {};
+
+	    var _iteratorNormalCompletion = true;
+	    var _didIteratorError = false;
+	    var _iteratorError = undefined;
+
+	    try {
+	        for (var _iterator = location.search.substring(1).split('&')[Symbol.iterator](), _step; !(_iteratorNormalCompletion = (_step = _iterator.next()).done); _iteratorNormalCompletion = true) {
+	            var param = _step.value;
+
+	            var nv = param.split('=');
+
+	            if (!nv[0]) continue;
+
+	            params[nv[0]] = nv[1] || true;
+	        }
+	    } catch (err) {
+	        _didIteratorError = true;
+	        _iteratorError = err;
+	    } finally {
+	        try {
+	            if (!_iteratorNormalCompletion && _iterator.return) {
+	                _iterator.return();
+	            }
+	        } finally {
+	            if (_didIteratorError) {
+	                throw _iteratorError;
+	            }
+	        }
+	    }
+
+	    return params;
+	};
 
 /***/ }
 /******/ ]);
