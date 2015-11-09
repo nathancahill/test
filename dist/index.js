@@ -100,6 +100,7 @@
 	} else {
 	    if (params.code) {
 	        github.accessToken(params.code, function () {
+	            window.history.replaceState({}, window.document.title, window.location.pathname);
 	            github.getUser(signinUser);
 	        });
 	    }
