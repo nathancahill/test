@@ -281,7 +281,7 @@
 	 */
 	var createFile = exports.createFile = function createFile(repo, branch, path, content, message, cb) {
 	    ajax({
-	        url: API_BASE + '/' + repo + '/contents/' + path,
+	        url: API_BASE + '/repos/' + repo + '/contents/' + path,
 	        method: 'PUT',
 	        body: JSON.stringify({
 	            path: path,
