@@ -284,12 +284,11 @@
 	        url: API_BASE + '/repos/' + repo + '/contents/' + path,
 	        method: 'PUT',
 	        body: JSON.stringify({
-	            path: path,
 	            message: message,
 	            content: content,
 	            branch: branch
-	        }, cb)
-	    });
+	        })
+	    }, cb);
 	};
 
 	/**
