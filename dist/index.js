@@ -83,7 +83,7 @@
 	        content = window.btoa(JSON.stringify(source, null, 3));
 
 	    github.getHead(repo, function (sha) {
-	        github.branch(repo, branch, sha, function () {
+	        github.branchRepo(repo, branch, sha, function () {
 	            github.createFile(repo, branch, path, content, message, function () {
 	                github.pullRequest('trailbehind/OpenHuntingData', username + ':' + branch, message, function () {
 	                    console.log('done');
