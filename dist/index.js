@@ -284,6 +284,7 @@
 	        url: API_BASE + '/' + repo + '/contents/' + path,
 	        method: 'PUT',
 	        body: JSON.stringify({
+	            path: path,
 	            message: message,
 	            content: content,
 	            branch: branch
