@@ -64,13 +64,10 @@
 	 * @param  {object} user Github user object.
 	 */
 	var loginUser = function loginUser(user) {
-	    var button = window.document.getElementById('login'),
-	        avatar = window.document.getElementById('avatar'),
-	        username = window.document.getElementById('username');
+	    var button = window.document.getElementById('login');
 
 	    button.setAttribute('href', '#');
-	    avatar.setAttribute('src', user.avatar_url + '&s=40');
-	    username.textContent = user.login;
+	    button.innerHTML = '<img class="avatar" src="' + (user.avatar_url + '&s=40') + '" /> ' + user.login;
 	};
 
 	/**
@@ -148,10 +145,6 @@
 
 	function _interopRequireDefault(obj) { return obj && obj.__esModule ? obj : { default: obj }; }
 
-	var CLIENT_ID = '80f0810fe99cf4c0a7fd';
-	var REDIRECT_URI = 'http://nathancahill.github.io/test/';
-	var SCOPE = 'public_repo';
-	var OAUTH_URL = 'https://github.com/login/oauth/authorize?client_id=' + CLIENT_ID + '&redirect_uri=' + REDIRECT_URI + '&scope=' + SCOPE;
 	var API_BASE = 'https://api.github.com';
 
 	var token = window.localStorage.getItem('token');
